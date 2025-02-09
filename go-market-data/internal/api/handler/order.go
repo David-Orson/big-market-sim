@@ -17,7 +17,61 @@ type OrderHandler struct {
 }
 
 func (oh *OrderHandler) Setup(mux *http.ServeMux) {
+	mux.HandleFunc("GET /order-book", oh.getOrderBook)
+	mux.HandleFunc("GET /trades", oh.getTrades)
 	mux.HandleFunc("POST /place-order", oh.placeOrder)
+}
+
+func (oh *OrderHandler) getOrderBook(w http.ResponseWriter, r *http.Request) {
+	symbol := r.URL.Query().Get("symbol")
+	if symbol == "" {
+		http.Error(w, "Missing symbol", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch order book (dummy implementation for now)
+	ob := getOrderBook(symbol)
+	if ob == nil {
+		http.Error(w, "Order book not found", http.StatusNotFound)
+		return
+	}
+
+	web.RespondJSON(w, ob, http.StatusOK)
+}
+
+func getOrderBook(symbol string) *models.OrderBook {
+	// Dummy implementation for now
+	return &models.OrderBook{
+		Symbol: symbol,
+		Bids: []*models.Order{
+			{ID: "1", Price: 100, Quantity: 10},
+			{ID: "2", Price: 99, Quantity: 5},
+		},
+		Asks: []*models.Order{
+			{ID: "3", Price: 101, Quantity: 15},
+			{ID: "4", Price: 102, Quantity: 20},
+		},
+	}
+}
+
+func (oh *OrderHandler) getTrades(w http.ResponseWriter, r *http.Request) {
+	symbol := r.URL.Query().Get("symbol")
+	if symbol == "" {
+		http.Error(w, "Missing symbol", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch trades for symbol
+	trades := getRecentTrades(symbol)
+	web.RespondJSON(w, trades, http.StatusOK)
+}
+
+func getRecentTrades(symbol string) []*models.Trade {
+	// Dummy implementation for now
+	return []*models.Trade{
+		{ID: "1", Price: 100, Quantity: 5, Timestamp: time.Now()},
+		{ID: "2", Price: 101, Quantity: 10, Timestamp: time.Now()},
+	}
 }
 
 func (oh *OrderHandler) placeOrder(w http.ResponseWriter, r *http.Request) {

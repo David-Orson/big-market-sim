@@ -34,7 +34,7 @@ const (
 type Order struct {
 	ID         string      `json:"order_id"`
 	Symbol     string      `json:"symbol"`
-	Price      float64     `json:"price,omitempty"` // Optional for market orders
+	Price      int64       `json:"price,omitempty"` // Optional for market orders
 	Quantity   int         `json:"quantity"`
 	OrderType  OrderType   `json:"order_type"`
 	Side       OrderSide   `json:"side"`
