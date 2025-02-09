@@ -1,0 +1,49 @@
+services:
+  # API Service (Go)
+  go-market-data:
+    image: cosmtrek/air:latest
+    container_name: go-market-data
+    working_dir: /go/src/go-market-data
+    environment:
+      - DB_HOST=md-db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_NAME=md
+      - GOPATH=/go
+    volumes:
+      - ./go-market-data/:/go/src/go-market-data
+    command: air -c air.toml
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h cr-db --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "8087:8087"
+    networks:
+      - big_market_sim-network
+
+  # Database for the API
+  md-db:
+    image: mysql:8.4.2
+    container_name: md-db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: md
+    volumes:
+      - md-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - big_market_sim-network
+
+networks:
+  big_market_sim-network:
+    driver: bridge
+
+volumes:
+  md-db-data:
